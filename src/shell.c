@@ -9,6 +9,7 @@
 #include "task.h"
 #include "host.h"
 
+
 typedef struct {
 	const char *name;
 	cmdfunc *fptr;
@@ -25,6 +26,10 @@ void host_command(int, char **);
 void mmtest_command(int, char **);
 void test_command(int, char **);
 void _command(int, char **);
+void fib_command(int, char **);
+void primetest_command(int, char **);
+int isPrime(int n);
+int str_to_int(char* str);
 
 #define MKCL(n, d) {.name=#n, .fptr=n ## _command, .desc=d}
 
@@ -37,6 +42,8 @@ cmdlist cl[]={
 	MKCL(mmtest, "heap memory allocation test"),
 	MKCL(help, "help"),
 	MKCL(test, "test new function"),
+	MKCL(fib, "Calcuate the nth Fibonacci number"),
+	MKCL(primetest, "Test if a number is a prime"),
 	MKCL(, ""),
 };
 
@@ -191,6 +198,59 @@ void _command(int n, char *argv[]){
     fio_printf(1, "\r\n");
 }
 
+void fib_command(int n, char *argv[])
+{
+	int input = str_to_int(argv[1]);
+	int i;
+	int fn, fn_1 = 1, fn_2 = 0, temp;
+	
+	if(input<0)
+		fio_printf(2, "\n\rInvalid input.\n\r");
+	else if(input==0)
+		fio_printf(2, "\n\rfib(0) = 0\n\r");
+	else if(input==1)
+		fio_printf(2, "\n\rfib(1) = 1\n\r");
+	else
+	{	
+		for(i=2; i<=input; i++)
+		{
+			fn = fn_1 + fn_2;			
+			temp = fn;							
+			fn_2 = fn_1;
+			fn_1 = temp;
+		}
+		fio_printf(2, "\n\rfib(%d) = %d\n\r", input, fn);
+	}
+}
+
+void primetest_command(int n, char *argv[])
+{
+	int input = str_to_int(argv[1]);
+	
+	if(isPrime(input))
+		fio_printf(2, "\n\rTRUE\n\r");
+	else
+		fio_printf(2, "\n\rFALSE\n\r");
+}
+
+int isPrime(int n) 
+{
+    if (n <= 3) 
+		return n > 1;
+	else if (n % 2 == 0 || n % 3 == 0) 
+		return 0;
+	else 
+	{
+		int i;
+		for (i = 5; i * i <= n; i += 6) 
+		{
+			if (n % i == 0 || n % (i + 2) == 0)
+				return 0;
+		}
+		return 1;
+	}
+}
+
 cmdfunc *do_command(const char *cmd){
 
 	int i;
@@ -200,4 +260,15 @@ cmdfunc *do_command(const char *cmd){
 			return cl[i].fptr;
 	}
 	return NULL;	
+}
+
+int str_to_int(char* str)
+{
+	int i, sum = 0;	
+	
+	for(i=0; str[i] != '\0'; i++)
+	{
+		sum = sum*10 + (str[i] - 48);
+	}
+	return sum;
 }
