@@ -30,6 +30,8 @@ void fib_command(int, char **);
 void primetest_command(int, char **);
 int isPrime(int n);
 int str_to_int(char* str);
+void task_command(int n, char *argv[]);
+void new_task( void *pvParameters );
 
 #define MKCL(n, d) {.name=#n, .fptr=n ## _command, .desc=d}
 
@@ -44,7 +46,8 @@ cmdlist cl[]={
 	MKCL(test, "test new function"),
 	MKCL(fib, "Calcuate the nth Fibonacci number"),
 	MKCL(primetest, "Test if a number is a prime"),
-	MKCL(, ""),
+	MKCL(task, "Create a blank task for test"),
+	MKCL(, "")
 };
 
 int parse_command(char *str, char *argv[]){
@@ -271,4 +274,28 @@ int str_to_int(char* str)
 		sum = sum*10 + (str[i] - 48);
 	}
 	return sum;
+}
+
+void task_command(int n, char *argv[])
+{
+	if(n==1)
+	{
+		fio_printf(2, "\r\nUsage: task <priority> <taskname>\r\n");
+		return;
+	}
+
+	int priority = str_to_int(argv[1]);
+	char *taskname = argv[2];
+	xTaskCreate(new_task, (signed portCHAR *) taskname, 512 /* stack size */, NULL, tskIDLE_PRIORITY + priority, NULL);
+	fio_printf(2, "\r\nNew task '%s' has been created with priority %d\r\n", taskname, priority);	
+}
+
+void new_task( void *pvParameters )
+{
+	fio_printf(1, "\r\nA newe task is born.\r\n");
+	for( ;; )
+	{
+		vTaskDelay(500);
+	}
+	vTaskDelete( NULL );
 }
